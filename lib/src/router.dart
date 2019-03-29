@@ -11,6 +11,7 @@ import 'dart:async';
 
 import 'package:fluro/fluro.dart';
 import 'package:fluro/src/common.dart';
+import 'package:fluro/src/interceptor.dart';
 import 'package:flutter/material.dart';
 
 class Router {
@@ -22,11 +23,18 @@ class Router {
   /// Generic handler for when a route has not been defined
   Handler notFoundHandler;
 
+  // 自定义路由拦截器
+  final RouterInterceptor _routerInterceptor = new RouterInterceptor();
+
   /// Creates a [PageRoute] definition for the passed [RouteHandler]. You can optionally provide a default transition type.
   void define(String routePath,
       {@required Handler handler, TransitionType transitionType}) {
     _routeTree.addRoute(
         new AppRoute(routePath, handler, transitionType: transitionType));
+  }
+
+  void defineInterceptor({@required InterceptorFunc func}) {
+    _routerInterceptor.add(func);
   }
 
   /// Finds a defined [AppRoute] for the path value. If no [AppRoute] definition was found
@@ -36,6 +44,34 @@ class Router {
   }
 
   bool pop(BuildContext context) => Navigator.pop(context);
+
+
+  Future tryNavigateTo(BuildContext context, String path,
+      {bool replace = false,
+        bool clearStack = false,
+        TransitionType transition,
+        Duration transitionDuration = const Duration(milliseconds: 250),
+        RouteTransitionsBuilder transitionBuilder}) {
+      Completer completer = new Completer();
+      Future future = completer.future;
+      _routerInterceptor.execute(path).then((blocked) {
+        if(blocked) {
+          String error = "Path been intercepted";
+          print(error);
+          completer.completeError(PathBeenIntercepted(error, path));
+        } else {
+          future = navigateTo(context, path,
+              replace: replace,
+              clearStack: clearStack,
+              transition: transition,
+              transitionDuration: transitionDuration,
+              transitionBuilder: transitionBuilder
+          );
+          completer.complete();
+          return future;
+        }
+      });
+  }
 
   ///
   Future navigateTo(BuildContext context, String path,
