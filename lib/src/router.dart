@@ -28,7 +28,7 @@ class Router {
   // 自定义路由拦截器
   final RouterInterceptor _routerInterceptor = new RouterInterceptor();
 
-  NavigatorState globalNavigatorState;
+  GlobalKey<NavigatorState> globalNavigatorKey;
 
   /// Creates a [PageRoute] definition for the passed [RouteHandler]. You can optionally provide a default transition type.
   void define(String routePath,
@@ -51,7 +51,7 @@ class Router {
   //void pop(BuildContext context) => Navigator.pop(context);
 
   bool pop<T extends Object>({NavigatorState navigatorState, T result,}) {
-    NavigatorState _navigatorState = navigatorState ?? globalNavigatorState;
+    NavigatorState _navigatorState = navigatorState ?? globalNavigatorKey?.currentState;
     return _navigatorState.pop(result);
   }
 
@@ -134,7 +134,7 @@ class Router {
                       TransitionType transition,
                       Duration transitionDuration = const Duration(milliseconds: 250),
                       RouteTransitionsBuilder transitionBuilder}) {
-    NavigatorState _navigatorState = navigatorState ?? globalNavigatorState;
+    NavigatorState _navigatorState = navigatorState ?? globalNavigatorKey?.currentState;
     BuildContext context = _navigatorState.context;
     RouteMatch routeMatch = matchRoute(context, path,
             transitionType: transition,
