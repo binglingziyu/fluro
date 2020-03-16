@@ -28,6 +28,8 @@ class Router {
   // 自定义路由拦截器
   final RouterInterceptor _routerInterceptor = new RouterInterceptor();
 
+  NavigatorState globalNavigatorState;
+
   /// Creates a [PageRoute] definition for the passed [RouteHandler]. You can optionally provide a default transition type.
   void define(String routePath,
       {@required Handler handler, TransitionType transitionType}) {
@@ -46,87 +48,94 @@ class Router {
     return _routeTree.matchRoute(path);
   }
 
-  void pop(BuildContext context) => Navigator.pop(context);
+  //void pop(BuildContext context) => Navigator.pop(context);
 
-
-  Future tryNavigateTo(BuildContext context, String path,
-      {bool replace = false,
-        bool clearStack = false,
-        TransitionType transition,
-        Duration transitionDuration = const Duration(milliseconds: 250),
-        RouteTransitionsBuilder transitionBuilder}) {
-      Completer completer = new Completer();
-      Future future = completer.future;
-      _routerInterceptor.execute(path).then((blocked) {
-        if(blocked) {
-          String error = "Path been intercepted";
-          print(error);
-          completer.completeError(PathBeenIntercepted(error, path));
-        } else {
-          future = navigateTo(context, path,
-              replace: replace,
-              clearStack: clearStack,
-              transition: transition,
-              transitionDuration: transitionDuration,
-              transitionBuilder: transitionBuilder
-          );
-          completer.complete();
-          return future;
-        }
-      });
+  bool pop<T extends Object>({NavigatorState navigatorState, T result,}) {
+    NavigatorState _navigatorState = navigatorState ?? globalNavigatorState;
+    return _navigatorState.pop(result);
   }
+
+
+//  Future tryNavigateTo(BuildContext context, String path,
+//      {bool replace = false,
+//        bool clearStack = false,
+//        TransitionType transition,
+//        Duration transitionDuration = const Duration(milliseconds: 250),
+//        RouteTransitionsBuilder transitionBuilder}) {
+//      Completer completer = new Completer();
+//      Future future = completer.future;
+//      _routerInterceptor.execute(path).then((blocked) {
+//        if(blocked) {
+//          String error = "Path been intercepted";
+//          print(error);
+//          completer.completeError(RouterBeenIntercepted(error, path));
+//        } else {
+//          future = navigateTo(context, path,
+//              replace: replace,
+//              clearStack: clearStack,
+//              transition: transition,
+//              transitionDuration: transitionDuration,
+//              transitionBuilder: transitionBuilder
+//          );
+//          completer.complete();
+//        }
+//      });
+//      return future;
+//  }
 
   /// Navigates using a context that has a [Navigator] attached to it
   /// (example, the first screen of a [MaterialApp] will create a [BuildContext]
   /// with a [Navigator]
-  Future navigateTo(BuildContext context, String path,
-      {bool replace = false,
-      bool clearStack = false,
-      TransitionType transition,
-      Duration transitionDuration = const Duration(milliseconds: 250),
-      RouteTransitionsBuilder transitionBuilder}) {
-    RouteMatch routeMatch = matchRoute(context, path,
-        transitionType: transition,
-        transitionsBuilder: transitionBuilder,
-        transitionDuration: transitionDuration);
-    Route<dynamic> route = routeMatch.route;
-    Completer completer = Completer();
-    Future future = completer.future;
-    if (routeMatch.matchType == RouteMatchType.nonVisual) {
-      completer.complete("Non visual route type.");
-    } else {
-      if (route == null && notFoundHandler != null) {
-        route = _notFoundRoute(context, path);
-      }
-      if (route != null) {
-        if (clearStack) {
-          future =
-              Navigator.pushAndRemoveUntil(context, route, (check) => false);
-        } else {
-          future = replace
-              ? Navigator.pushReplacement(context, route)
-              : Navigator.push(context, route);
-        }
-        completer.complete();
-      } else {
-        String error = "No registered route was found to handle '$path'.";
-        print(error);
-        completer.completeError(RouteNotFoundException(error, path));
-      }
-    }
-
-    return future;
-  }
+//  Future navigateTo(BuildContext context, String path,
+//      {bool replace = false,
+//      bool clearStack = false,
+//      TransitionType transition,
+//      Duration transitionDuration = const Duration(milliseconds: 250),
+//      RouteTransitionsBuilder transitionBuilder}) {
+//    RouteMatch routeMatch = matchRoute(context, path,
+//        transitionType: transition,
+//        transitionsBuilder: transitionBuilder,
+//        transitionDuration: transitionDuration);
+//    Route<dynamic> route = routeMatch.route;
+//    Completer completer = Completer();
+//    Future future = completer.future;
+//    if (routeMatch.matchType == RouteMatchType.nonVisual) {
+//      completer.complete("Non visual route type.");
+//    } else {
+//      if (route == null && notFoundHandler != null) {
+//        route = _notFoundRoute(context, path);
+//      }
+//      if (route != null) {
+//        if (clearStack) {
+//          future =
+//              Navigator.pushAndRemoveUntil(context, route, (check) => false);
+//        } else {
+//          future = replace
+//              ? Navigator.pushReplacement(context, route)
+//              : Navigator.push(context, route);
+//        }
+//        completer.complete();
+//      } else {
+//        String error = "No registered route was found to handle '$path'.";
+//        print(error);
+//        completer.completeError(RouteNotFoundException(error, path));
+//      }
+//    }
+//
+//    return future;
+//  }
 
   /// Navigates using [NavigatorState] that can be easily stored statically
   /// in a [GlobalKey] at the beginning of the [MaterialApp]
-  Future navigateWithNavigatorState(NavigatorState navigatorState, String path,
-                    {bool replace = false,
+  Future navigateTo(String path,
+                    { NavigatorState navigatorState,
+                      bool replace = false,
                       bool clearStack = false,
                       TransitionType transition,
                       Duration transitionDuration = const Duration(milliseconds: 250),
                       RouteTransitionsBuilder transitionBuilder}) {
-    BuildContext context = navigatorState.context;
+    NavigatorState _navigatorState = navigatorState ?? globalNavigatorState;
+    BuildContext context = _navigatorState.context;
     RouteMatch routeMatch = matchRoute(context, path,
             transitionType: transition,
             transitionsBuilder: transitionBuilder,
@@ -141,14 +150,23 @@ class Router {
         route = _notFoundRoute(context, path);
       }
       if (route != null) {
-        if (clearStack) {
-          future =
-                  navigatorState.pushAndRemoveUntil(route, (check) => false);
-        } else {
-          future = replace
-                  ? navigatorState.pushReplacement(route)
-                  : navigatorState.push(route);
-        }
+        _routerInterceptor.execute(path).then((blocked) {
+          if(blocked) {
+            String error = "Router been intercepted";
+            print(error);
+            completer.completeError(RouterBeenIntercepted(error, path));
+          } else {
+            if (clearStack) {
+              future =
+                  _navigatorState.pushAndRemoveUntil(route, (check) => false);
+            } else {
+              future = replace
+                  ? _navigatorState.pushReplacement(route)
+                  : _navigatorState.push(route);
+            }
+          }
+        });
+
         completer.complete();
       } else {
         String error = "No registered route was found to handle '$path'.";

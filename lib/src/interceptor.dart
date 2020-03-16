@@ -21,10 +21,10 @@ class RouterInterceptor {
   }
 }
 
-class PathBeenIntercepted implements Exception {
+class RouterBeenIntercepted implements Exception {
   final String message;
   final String path;
-  PathBeenIntercepted(this.message, this.path);
+  RouterBeenIntercepted(this.message, this.path);
 
   @override
   String toString() {
