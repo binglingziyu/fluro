@@ -150,8 +150,8 @@ class Router {
         route = _notFoundRoute(context, path);
       }
       if (route != null) {
-        _routerInterceptor.execute(path).then((blocked) {
-          if(blocked) {
+        _routerInterceptor.execute(path).then((intercepted) {
+          if(intercepted) {
             String error = "Router been intercepted";
             print(error);
             completer.completeError(RouterBeenIntercepted(error, path));
@@ -164,10 +164,9 @@ class Router {
                   ? _navigatorState.pushReplacement(route)
                   : _navigatorState.push(route);
             }
+            completer.complete();
           }
         });
-
-        completer.complete();
       } else {
         String error = "No registered route was found to handle '$path'.";
         print(error);

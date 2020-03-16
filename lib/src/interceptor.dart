@@ -10,14 +10,14 @@ class RouterInterceptor {
   }
   Future<bool> execute(String path) async {
     if(_interceptors.isEmpty) {
-      return true;
+      return false;
     }
     for(InterceptorFunc fun in _interceptors) {
       if(await fun(path)) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 }
 
