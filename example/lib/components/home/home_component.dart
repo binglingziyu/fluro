@@ -231,13 +231,13 @@ class HomeComponentState extends State<HomeComponent> {
         route = "$route&result=$result";
       }
 
-      Application.router
-          .navigateTo(context, route, transition: transitionType)
-          .then((result) {
-        if (key == "pop-result") {
-          Application.router.navigateTo(context, "/demo/func?message=$result");
-        }
-      });
+//      Application.router
+//          .navigateTo(context, route, transition: transitionType)
+//          .then((result) {
+//        if (key == "pop-result") {
+//          Application.router.navigateTo(context, "/demo/func?message=$result");
+//        }
+//      });
     } else if (key == "custom") {
       hexCode = "#DFF700";
       message =
@@ -252,19 +252,19 @@ class HomeComponentState extends State<HomeComponent> {
           ),
         );
       };
-      Application.router.navigateTo(
-        context,
-        "/demo?message=$message&color_hex=$hexCode",
-        transition: TransitionType.custom,
-        transitionBuilder: transition,
-        transitionDuration: const Duration(milliseconds: 600),
-      );
+//      Application.router.navigateTo(
+//        context,
+//        "/demo?message=$message&color_hex=$hexCode",
+//        transition: TransitionType.custom,
+//        transitionBuilder: transition,
+//        transitionDuration: const Duration(milliseconds: 600),
+//      );
     } else if (key == "fixed-trans") {
-      Application.router.navigateTo(
-          context, "/demo/fixedtrans?message=Hello!&color_hex=#f4424b");
+//      Application.router.navigateTo(
+//          context, "/demo/fixedtrans?message=Hello!&color_hex=#f4424b");
     } else {
       message = "You tapped the function button!";
-      Application.router.navigateTo(context, "/demo/func?message=$message");
+//      Application.router.navigateTo(context, "/demo/func?message=$message");
     }
   }
 }

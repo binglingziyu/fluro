@@ -50,7 +50,7 @@ class Router {
 
   //void pop(BuildContext context) => Navigator.pop(context);
 
-  bool pop<T extends Object>({NavigatorState navigatorState, T result,}) {
+  void pop<T extends Object>({NavigatorState navigatorState, T result,}) {
     NavigatorState _navigatorState = navigatorState ?? globalNavigatorKey?.currentState;
     return _navigatorState.pop(result);
   }
