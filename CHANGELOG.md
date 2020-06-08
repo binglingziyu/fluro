@@ -1,3 +1,9 @@
+# 1.6.3
+- Remove upper bounds on Flutter SDK checks because Flutter releases are a ridiculous mess
+
+# 1.6.2
+- Support for Flutter `>=1.12 <=1.17`
+
 # 1.6.1
 - Support for Flutter `1.12+`
 
